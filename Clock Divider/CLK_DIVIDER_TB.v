@@ -1,0 +1,99 @@
+module CLK_DIV_TB #(parameter width = 8) ();
+	reg					clk_ref_tb   ;
+	reg					rst_tb       ;
+	reg					clk_en_tb    ;
+	reg	 [width-1 : 0]  div_ratio_tb ;
+	
+	wire				div_clk_tb   ;
+	
+////////////////////////////////////////////////////////////
+////////////////////// DUT Signals ////////////////////////
+//////////////////////////////////////////////////////////
+
+	CLK_DIV DUT (
+	.clk_ref(clk_ref_tb) ,
+	.rst(rst_tb) ,
+	.i_clk_en(clk_en_tb) ,
+	.div_ratio(div_ratio_tb) ,
+	.o_div_clk(div_clk_tb)
+	);
+	
+////////////////////////////////////////////////////////////
+/////////////////////// parameter /////////////////////////
+//////////////////////////////////////////////////////////
+
+	parameter CLK_PER = 10 ;
+	
+////////////////////////////////////////////////////////////
+///////////////////// initial block ///////////////////////
+//////////////////////////////////////////////////////////
+	
+	initial
+	begin
+		$dumpfile("CLK_DIVIDER.vcd");
+		$dumpvars;
+		
+		//intialize task
+		intialize();
+		
+		//reset task
+		reset() ;
+		
+		//do task
+		
+		//do_oper(divided ratio , clk_en)
+		do_oper(0,1) ;
+		do_oper(1,1) ;
+		do_oper(2,1) ;
+		do_oper(3,1) ;
+		do_oper(4,1) ;
+		do_oper(5,1) ;
+		do_oper(6,1) ;
+		do_oper(7,1) ;
+		do_oper(8,0) ;
+		
+		#(10*CLK_PER) $finish  ;
+ 	end
+	
+////////////////////////////////////////////////////////////
+///////////////////////// Tasks ///////////////////////////
+//////////////////////////////////////////////////////////
+	
+//////////////////// Intialize task ////////////////////
+	task intialize ;
+	begin
+		clk_ref_tb = 1'b0 ;
+		rst_tb     = 1'b1 ;
+		clk_en_tb  = 1'b0 ;
+		div_ratio_tb = 0  ;
+	end
+	endtask
+	
+//////////////////// reset task /////////////////////
+	task reset ;
+	begin
+		#CLK_PER	rst_tb = 1'b1 ;
+		#CLK_PER	rst_tb = 1'b0 ;
+		#CLK_PER	rst_tb = 1'b1 ;
+	end
+	endtask
+	
+////////////////////// Do task //////////////////////
+	task do_oper ;
+	input	 reg	[width-1 : 0]	Div_Ratio ;
+	input	 reg					enable    ;
+	begin
+		#(CLK_PER)
+		div_ratio_tb = Div_Ratio ;
+		clk_en_tb    = enable    ;
+		#(20*CLK_PER) ;
+	end
+	endtask
+	
+////////////////////////////////////////////////////////////
+//////////////////// Generated clock //////////////////////
+//////////////////////////////////////////////////////////
+	
+	always #(CLK_PER/2) clk_ref_tb = ~clk_ref_tb ; 
+	
+endmodule
